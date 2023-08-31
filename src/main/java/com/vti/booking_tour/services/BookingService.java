@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.Option;
 import java.awt.print.Book;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingService {
@@ -21,7 +23,8 @@ public class BookingService {
      }
 
      public Booking insert(Booking booking){
-
+         booking.setCreatedDate(LocalDateTime.now());
+         booking.setStatus(BookingStatus.BOOKING_PENDING);
          return bookingRepository.save(booking);
      }
 
@@ -52,20 +55,29 @@ public class BookingService {
 
      public List<Booking> findAllBookingActive()
      {
-         // GOING  PENDING
-         return null;
+         // GOING || PENDING
+
+         return bookingRepository.findAll().stream().filter
+                 (booking-> booking.isActive() == true).collect(Collectors.toList());
+
      }
 
     public List<Booking> findAllBookingCancel()
     {
 
-        return null;
+        return bookingRepository.findAll().stream().filter
+                (booking-> booking.isCancel() == true).collect(Collectors.toList());
     }
 
 
     public List<Booking> findAllBookingFinish()
     {
 
-        return null;
+        return bookingRepository.findAll().stream().filter
+                (booking-> booking.isFinish() == true).collect(Collectors.toList());
+    }
+
+    public Optional<Booking> getBookingById(Long id) {
+         return bookingRepository.findById(id);
     }
 }

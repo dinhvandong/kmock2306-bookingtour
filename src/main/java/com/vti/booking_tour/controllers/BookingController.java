@@ -1,6 +1,7 @@
 package com.vti.booking_tour.controllers;
 
 import com.vti.booking_tour.entities.Booking;
+import com.vti.booking_tour.models.ResponseObject;
 import com.vti.booking_tour.services.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-
+@CrossOrigin(origins = {"http://localhost:3000"},maxAge = 3600)
 @RestController
 @RequestMapping("/api/bookings")
 public class BookingController {
@@ -21,8 +22,10 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<Booking> getAllBookings() {
-        return bookingService.findAllBookingActive();
+    public ResponseEntity<?> getAllBookings() {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        new ResponseObject(200, "OK", bookingService.findAllBookingActive() ));
     }
 
     @GetMapping("/{id}")
@@ -32,16 +35,16 @@ public class BookingController {
     }
 
     @PostMapping
-    public ResponseEntity<Booking> createBooking(@RequestBody Booking booking) {
+    public ResponseEntity<?> createBooking(@RequestBody Booking booking) {
         Booking createdBooking = bookingService.insert(booking);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdBooking);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject(200, "OK", createdBooking));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Booking> updateBooking(@PathVariable Long id, @RequestBody Booking booking) {
-        Optional<Booking> existingBooking = bookingService.getBookingById(id);
+    @PutMapping
+    public ResponseEntity<Booking> updateBooking(@RequestBody Booking booking) {
+        Optional<Booking> existingBooking = bookingService.getBookingById(booking.getId());
         if (existingBooking.isPresent()) {
-            booking.setId(id);
             Booking updatedBooking = bookingService.update(booking);
             return ResponseEntity.ok(updatedBooking);
         } else {

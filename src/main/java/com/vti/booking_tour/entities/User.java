@@ -27,6 +27,7 @@ public class User {
     private String password;
     private String phoneNumber;
     private String email;
+    private boolean active;
     private LocalDateTime createdDate;
     private int status;
     @JsonIgnore

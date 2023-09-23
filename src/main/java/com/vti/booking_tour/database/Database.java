@@ -2,16 +2,28 @@ package com.vti.booking_tour.database;
 
 
 import com.vti.booking_tour.entities.Role;
+import com.vti.booking_tour.entities.User;
 import com.vti.booking_tour.models.ERole;
 import com.vti.booking_tour.repositories.RoleRepository;
+import com.vti.booking_tour.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Configuration
 public class Database {
+
+    @Autowired
+    PasswordEncoder encoder;
     @Bean
-    CommandLineRunner initDatabase(RoleRepository roleRepository){
+    CommandLineRunner initDatabase(RoleRepository roleRepository, UserRepository userRepository){
         return new CommandLineRunner() {
             @Override
             public void run(String... args) throws Exception {
@@ -41,6 +53,21 @@ public class Database {
                     roleRepository.save(role3);
                     roleRepository.save(role4);
                     roleRepository.save(role5);
+                }
+
+                if(userRepository.findAll().size()==0){
+                    User admin = new User();
+                    admin.setId(1l);
+                    admin.setUsername("admin");
+                    admin.setEmail("admin@gmail.com");
+                    admin.setCreatedDate(LocalDateTime.now());
+                    Set<Role> roles = new HashSet<>();
+                    admin.setPassword(encoder.encode("A123456a@"));
+                    Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    roles.add(adminRole);
+                    admin.setRoles(roles);
+                    userRepository.save(admin);
                 }
             }
         };
